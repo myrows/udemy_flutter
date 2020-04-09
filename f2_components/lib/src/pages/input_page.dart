@@ -9,6 +9,13 @@ class InputPage extends StatefulWidget {
 class _InputPageState extends State<InputPage> {
 
   String _fullname = '';
+  String _fecha = '';
+
+  String _opcionSeleccionada = 'Volar';
+
+  List<String> _poderes = ['Volar', 'Rayos X', 'Super Aliento'];
+
+  TextEditingController _inputFieldDateController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +39,11 @@ class _InputPageState extends State<InputPage> {
 
           SizedBox(height: 20),
 
-          _crearFecha()
+          _crearFecha( context ),
+
+          SizedBox(height: 20),
+
+          _crearDropdown( context )
 
         ],
       ),
@@ -42,7 +53,6 @@ class _InputPageState extends State<InputPage> {
   Widget _crearInput() {
     
     return TextField(
-      autofocus: true,
       textCapitalization: TextCapitalization.words,
       decoration: InputDecoration(
         prefixIcon: Icon( Icons.person ),
@@ -107,23 +117,26 @@ class _InputPageState extends State<InputPage> {
     );
   }
 
-  Widget _crearFecha() {
+  Widget _crearFecha( BuildContext context ) {
 
     return TextField(
       enableInteractiveSelection: false,
-      textCapitalization: TextCapitalization.words,
+      controller: _inputFieldDateController,
       decoration: InputDecoration(
         prefixIcon: Icon( Icons.calendar_today ),
         suffixIcon: Icon( Icons.perm_contact_calendar ),
-        hintText: 'Fecha de nacimiento',
+        hintText: '1998-04-10',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20.0)
         ),
-        labelText: 'Fecha de nacimiento'
+        labelText: 'Date of birth'
       ),
       onTap: () {
 
         FocusScope.of(context).requestFocus(new FocusNode());
+
+        //Datepicker
+        _selectDate( context );
 
       },
       onChanged: ( text ) {
@@ -134,4 +147,67 @@ class _InputPageState extends State<InputPage> {
     );
 
   }
+
+      _selectDate(BuildContext context) async {
+
+      DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: new DateTime.now(),
+        firstDate: new DateTime(2020),
+        lastDate: new DateTime(2025),
+        locale: Locale('es', 'Spanish')
+      );
+
+      if ( picked != null ) {
+
+        setState(() {
+          _fecha = picked.toString();
+
+          //Establecemos la comunicación con el input de la fecha
+          _inputFieldDateController.text = _fecha;
+        });
+
+      }
+
+    }
+
+    List<DropdownMenuItem<String>> getOpcionesDropdown() {
+
+      List<DropdownMenuItem<String>> lista = new List();
+
+      _poderes.forEach( (poder) {
+
+        lista.add( DropdownMenuItem(
+          child: Text(poder),
+          value: poder,
+        ));
+
+      });
+
+      return lista;
+    }
+
+  Widget _crearDropdown(BuildContext context) {
+
+    return Row(
+      children: <Widget>[
+        SizedBox(width: 10.0),
+        Expanded(
+            child: DropdownButton(
+              icon: Icon( Icons.power ),
+            elevation: 3,
+            value: _opcionSeleccionada,
+            items: getOpcionesDropdown(),
+            onChanged: ( data ) {
+
+              setState(() => _opcionSeleccionada = data
+              );
+              
+            }
+          ),
+        ),
+      ],
+    );
+  }
+
 }
